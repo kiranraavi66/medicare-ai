@@ -1,6 +1,6 @@
 # 🩺 MediCare AI — AI-Powered Healthcare Assistant & Web Platform
 
-> **Final Year B.Tech Capstone Project Showcase**  
+> **Full-Stack AI Healthcare Application**  
 > An intelligent, full-stack medical information web application integrating **React**, **FastAPI**, **Google Gemini AI**, **JWT Authentication**, **Medical Lab Report Summarization**, **Symptom Risk Triage**, **Hospital Geolocation**, and **Medicine Schedule Reminders**.
 
 ---
