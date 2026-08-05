@@ -3,7 +3,7 @@ import axios from 'axios';
 
 const AuthContext = createContext();
 
-const API_BASE_URL = 'http://localhost:8000/api/v1';
+const API_BASE_URL ="https://medicare-ai-8vv3.onrender.com/api/v1";
 
 export const AuthProvider = ({ children }) => {
   const [user, setUser] = useState(null);
