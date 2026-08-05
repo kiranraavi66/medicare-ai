@@ -1,0 +1,30 @@
+# Virtual Environment
+venv/
+.venv/
+.venv-1/
+.env
+
+# Python cache
+__pycache__/
+*.pyc
+
+# Database
+*.db
+
+# FastAPI / Uvicorn
+*.log
+
+# Node.js
+node_modules/
+
+# Build files
+dist/
+build/
+
+# IDE files
+.vscode/
+.idea/
+
+# System files
+.DS_Store
+Thumbs.db

@@ -1,0 +1,44 @@
+version: '3.8'
+
+services:
+  postgres:
+    image: postgres:15-alpine
+    container_name: medicare_postgres
+    restart: always
+    environment:
+      POSTGRES_USER: medicare_user
+      POSTGRES_PASSWORD: medicare_password
+      POSTGRES_DB: medicare_db
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: medicare_backend
+    restart: always
+    environment:
+      - DATABASE_URL=postgresql://medicare_user:medicare_password@postgres:5432/medicare_db
+      - SECRET_KEY=supersecretjwtkeyforbtechprojectchangeinproduction
+      - GEMINI_API_KEY=${GEMINI_API_KEY}
+    ports:
+      - "8000:8000"
+    depends_on:
+      - postgres
+
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    container_name: medicare_frontend
+    restart: always
+    ports:
+      - "3000:80"
+    depends_on:
+      - backend
+
+volumes:
+  postgres_data:
