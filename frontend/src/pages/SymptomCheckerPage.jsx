@@ -168,6 +168,24 @@ export const SymptomCheckerPage = () => {
               <h2 style={{ fontSize: '1.8rem', color: 'inherit', marginTop: '0.2rem' }}>{result.risk_level} Risk Level</h2>
             </div>
 
+            {/* Specialist & Urgency Info Cards */}
+            {(result.specialist_recommendation || result.urgency_timeframe) && (
+              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0.75rem' }}>
+                {result.urgency_timeframe && (
+                  <div style={{ background: 'var(--bg-input)', padding: '0.75rem', borderRadius: '10px', fontSize: '0.8rem' }}>
+                    <strong style={{ display: 'block', color: 'var(--primary)', marginBottom: '0.2rem' }}>⏰ Recommended Timeframe:</strong>
+                    <span>{result.urgency_timeframe}</span>
+                  </div>
+                )}
+                {result.specialist_recommendation && (
+                  <div style={{ background: 'var(--bg-input)', padding: '0.75rem', borderRadius: '10px', fontSize: '0.8rem' }}>
+                    <strong style={{ display: 'block', color: 'var(--secondary)', marginBottom: '0.2rem' }}>👨‍⚕️ Specialist Department:</strong>
+                    <span>{result.specialist_recommendation}</span>
+                  </div>
+                )}
+              </div>
+            )}
+
             <div>
               <h4 style={{ marginBottom: '0.5rem', display: 'flex', alignItems: 'center', gap: '0.4rem' }}>
                 <Stethoscope size={18} color="var(--primary)" /> Possible Clinical Considerations
@@ -178,6 +196,21 @@ export const SymptomCheckerPage = () => {
                 ))}
               </ul>
             </div>
+
+            {result.suggested_tests && result.suggested_tests.length > 0 && (
+              <div>
+                <h4 style={{ marginBottom: '0.5rem', display: 'flex', alignItems: 'center', gap: '0.4rem', color: 'var(--accent)' }}>
+                  <ShieldCheck size={18} /> Suggested Diagnostic Tests (To Discuss With Doctor)
+                </h4>
+                <div style={{ display: 'flex', flexWrap: 'wrap', gap: '0.4rem' }}>
+                  {result.suggested_tests.map((test, idx) => (
+                    <span key={idx} style={{ background: 'var(--bg-input)', border: '1px solid var(--border-color)', padding: '0.3rem 0.6rem', borderRadius: '12px', fontSize: '0.8rem' }}>
+                      🔬 {test}
+                    </span>
+                  ))}
+                </div>
+              </div>
+            )}
 
             <div>
               <h4 style={{ marginBottom: '0.5rem', display: 'flex', alignItems: 'center', gap: '0.4rem' }}>
@@ -203,3 +236,4 @@ export const SymptomCheckerPage = () => {
     </div>
   );
 };
+

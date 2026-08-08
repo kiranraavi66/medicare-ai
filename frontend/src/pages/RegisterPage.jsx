@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
-import { UserPlus, ShieldAlert } from 'lucide-react';
+import { UserPlus, ShieldAlert, LogIn, ArrowRight } from 'lucide-react';
 
 export const RegisterPage = () => {
   const { register } = useAuth();
@@ -11,18 +11,47 @@ export const RegisterPage = () => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
+  const [isEmailExistsError, setIsEmailExistsError] = useState(false);
   const [loading, setLoading] = useState(false);
+
+  const parseErrorMessage = (err) => {
+    if (!err.response) {
+      return 'Unable to reach server. Please ensure the backend server is running.';
+    }
+    const detail = err.response?.data?.detail;
+    if (typeof detail === 'string') {
+      return detail;
+    }
+    if (Array.isArray(detail) && detail.length > 0) {
+      return detail.map(d => d.msg || d.message || JSON.stringify(d)).join(', ');
+    }
+    if (typeof detail === 'object' && detail !== null) {
+      return detail.msg || detail.message || JSON.stringify(detail);
+    }
+    return err.message || 'Registration failed. Please check your inputs.';
+  };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     setError('');
+    setIsEmailExistsError(false);
+
+    if (password.length < 6) {
+      setError('Password must be at least 6 characters long.');
+      return;
+    }
+
     setLoading(true);
 
     try {
       await register(email, fullName, password);
       navigate('/dashboard');
     } catch (err) {
-      setError(err.response?.data?.detail || 'Registration failed. Email might already exist.');
+      const errMsg = parseErrorMessage(err);
+      setError(errMsg);
+      if (errMsg.toLowerCase().includes('already registered') || errMsg.toLowerCase().includes('already exist')) {
+        setIsEmailExistsError(true);
+      }
     } finally {
       setLoading(false);
     }
@@ -43,8 +72,20 @@ export const RegisterPage = () => {
         </div>
 
         {error && (
-          <div style={{ background: 'rgba(239, 68, 68, 0.1)', border: '1px solid var(--danger)', color: 'var(--danger)', padding: '0.75rem', borderRadius: '8px', marginBottom: '1rem', fontSize: '0.85rem', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-            <ShieldAlert size={16} /> {error}
+          <div style={{ background: 'rgba(239, 68, 68, 0.1)', border: '1px solid var(--danger)', color: 'var(--danger)', padding: '0.85rem', borderRadius: '8px', marginBottom: '1rem', fontSize: '0.85rem', display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', fontWeight: 600 }}>
+              <ShieldAlert size={18} style={{ flexShrink: 0 }} /> {error}
+            </div>
+            {isEmailExistsError && (
+              <div style={{ marginTop: '0.25rem', paddingTop: '0.5rem', borderTop: '1px solid rgba(239, 68, 68, 0.2)' }}>
+                <p style={{ margin: '0 0 0.5rem 0', color: 'var(--text-main)', fontSize: '0.8rem' }}>
+                  An account with this email address already exists in MediCare AI.
+                </p>
+                <Link to="/login" className="btn btn-primary" style={{ padding: '0.4rem 0.8rem', fontSize: '0.8rem', display: 'inline-flex', alignItems: 'center', gap: '0.4rem', textDecoration: 'none' }}>
+                  <LogIn size={14} /> Sign In To Your Account <ArrowRight size={14} />
+                </Link>
+              </div>
+            )}
           </div>
         )}
 
@@ -67,7 +108,7 @@ export const RegisterPage = () => {
               required 
               placeholder="name@example.com" 
               value={email} 
-              onChange={(e) => setEmail(e.target.value)} 
+              onChange={(e) => { setEmail(e.target.value); setError(''); setIsEmailExistsError(false); }} 
             />
           </div>
 
@@ -96,3 +137,4 @@ export const RegisterPage = () => {
     </div>
   );
 };
+

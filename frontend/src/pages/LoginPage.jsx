@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
-import { LogIn, Key, Mail, ShieldAlert, Sparkles } from 'lucide-react';
+import { LogIn, ShieldAlert, Sparkles, UserPlus } from 'lucide-react';
 
 export const LoginPage = () => {
   const { login } = useAuth();
@@ -12,6 +12,23 @@ export const LoginPage = () => {
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
 
+  const parseErrorMessage = (err) => {
+    if (!err.response) {
+      return 'Unable to connect to server. Please verify backend is running.';
+    }
+    const detail = err.response?.data?.detail;
+    if (typeof detail === 'string') {
+      return detail;
+    }
+    if (Array.isArray(detail) && detail.length > 0) {
+      return detail.map(d => d.msg || d.message || JSON.stringify(d)).join(', ');
+    }
+    if (typeof detail === 'object' && detail !== null) {
+      return detail.msg || detail.message || JSON.stringify(detail);
+    }
+    return err.message || 'Sign in failed. Please check your credentials.';
+  };
+
   const handleSubmit = async (e) => {
     e.preventDefault();
     setError('');
@@ -21,7 +38,7 @@ export const LoginPage = () => {
       await login(email, password);
       navigate('/dashboard');
     } catch (err) {
-      setError(err.response?.data?.detail || 'Failed to sign in. Please check credentials.');
+      setError(parseErrorMessage(err));
     } finally {
       setLoading(false);
     }
@@ -30,11 +47,13 @@ export const LoginPage = () => {
   const setDemoUser = () => {
     setEmail('patient@medicare.ai');
     setPassword('password123');
+    setError('');
   };
 
   const setDemoAdmin = () => {
     setEmail('admin@medicare.ai');
     setPassword('adminpassword123');
+    setError('');
   };
 
   return (
@@ -52,8 +71,8 @@ export const LoginPage = () => {
         </div>
 
         {error && (
-          <div style={{ background: 'rgba(239, 68, 68, 0.1)', border: '1px solid var(--danger)', color: 'var(--danger)', padding: '0.75rem', borderRadius: '8px', marginBottom: '1rem', fontSize: '0.85rem', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-            <ShieldAlert size={16} /> {error}
+          <div style={{ background: 'rgba(239, 68, 68, 0.1)', border: '1px solid var(--danger)', color: 'var(--danger)', padding: '0.85rem', borderRadius: '8px', marginBottom: '1rem', fontSize: '0.85rem', display: 'flex', alignItems: 'center', gap: '0.5rem', fontWeight: 600 }}>
+            <ShieldAlert size={18} style={{ flexShrink: 0 }} /> {error}
           </div>
         )}
 
@@ -66,7 +85,7 @@ export const LoginPage = () => {
                 required 
                 placeholder="name@example.com" 
                 value={email} 
-                onChange={(e) => setEmail(e.target.value)} 
+                onChange={(e) => { setEmail(e.target.value); setError(''); }} 
               />
             </div>
           </div>
@@ -108,3 +127,4 @@ export const LoginPage = () => {
     </div>
   );
 };
+

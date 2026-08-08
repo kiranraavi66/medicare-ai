@@ -69,7 +69,11 @@ class SymptomCheckResponse(BaseModel):
     risk_level: str # "Low", "Moderate", "High"
     possible_conditions: List[str]
     recommended_actions: List[str]
+    specialist_recommendation: Optional[str] = None
+    urgency_timeframe: Optional[str] = None
+    suggested_tests: Optional[List[str]] = None
     disclaimer: str
+
 
 # Reminder Schemas
 class ReminderCreate(BaseModel):

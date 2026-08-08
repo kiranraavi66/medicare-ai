@@ -10,8 +10,9 @@ import {
   Trash2, 
   Bot, 
   User, 
-  Sparkles, 
-  AlertCircle 
+  Sparkles,
+  Copy,
+  Check
 } from 'lucide-react';
 
 export const ChatAssistantPage = () => {
@@ -21,6 +22,7 @@ export const ChatAssistantPage = () => {
   const [loading, setLoading] = useState(false);
   const [listening, setListening] = useState(false);
   const [speakingMsgId, setSpeakingMsgId] = useState(null);
+  const [copiedId, setCopiedId] = useState(null);
   
   const messagesEndRef = useRef(null);
   const recognitionRef = useRef(null);
@@ -99,7 +101,6 @@ export const ChatAssistantPage = () => {
       return;
     }
     window.speechSynthesis.cancel();
-    // Clean markdown hashes or asterisks for clear speech
     const cleanText = text.replace(/[*#_`]/g, '');
     const utterance = new SpeechSynthesisUtterance(cleanText);
     utterance.rate = 1.0;
@@ -112,6 +113,12 @@ export const ChatAssistantPage = () => {
     window.speechSynthesis.speak(utterance);
   };
 
+  const copyToClipboard = (id, text) => {
+    navigator.clipboard.writeText(text);
+    setCopiedId(id);
+    setTimeout(() => setCopiedId(null), 2000);
+  };
+
   const handleSendMessage = async (textToSend = null) => {
     const query = textToSend || inputMessage;
     if (!query.trim() || loading) return;
@@ -119,7 +126,6 @@ export const ChatAssistantPage = () => {
     setInputMessage('');
     setLoading(true);
 
-    // Optimistic UI update
     const tempUserMsg = { id: Date.now(), sender: 'user', content: query, created_at: new Date().toISOString() };
     setMessages(prev => [...prev, tempUserMsg]);
 
@@ -131,7 +137,7 @@ export const ChatAssistantPage = () => {
       const errorMsg = { 
         id: Date.now() + 1, 
         sender: 'assistant', 
-        content: '⚠️ I experienced an issue communicating with the AI service. Please check your connection and try again.', 
+        content: '⚠️ Experienced an issue connecting with MediCare AI backend. Please verify your connection and try again.', 
         created_at: new Date().toISOString() 
       };
       setMessages(prev => [...prev, errorMsg]);
@@ -150,6 +156,15 @@ export const ChatAssistantPage = () => {
     }
   };
 
+  const sampleQueries = [
+    "What should I do for a mild fever?",
+    "First aid guidance for minor burns",
+    "How to manage blood pressure naturally?",
+    "What are early signs of diabetes?",
+    "How to treat an acid reflux at home?",
+    "How to relieve tension headaches?"
+  ];
+
   return (
     <div style={{ maxWidth: '1000px', margin: '1.5rem auto', padding: '0 1rem' }}>
       <div className="glass-panel" style={{ height: 'calc(88vh - 80px)', display: 'flex', flexDirection: 'column' }}>
@@ -163,13 +178,13 @@ export const ChatAssistantPage = () => {
             <div>
               <h2 style={{ fontSize: '1.2rem' }}>MediCare AI Health Assistant</h2>
               <span style={{ fontSize: '0.8rem', color: 'var(--text-muted)' }}>
-                Powered by Gemini 1.5 Flash • Voice Enabled
+                Medical Intelligence & General Health Consultation • Voice Enabled
               </span>
             </div>
           </div>
 
           <button onClick={handleClearHistory} className="btn btn-secondary" style={{ padding: '0.4rem 0.8rem', fontSize: '0.8rem' }} title="Clear Chat History">
-            <Trash2 size={14} color="var(--danger)" /> Clear Chat
+            <Trash2 size={14} color="var(--danger)" /> Clear History
           </button>
         </div>
 
@@ -180,18 +195,13 @@ export const ChatAssistantPage = () => {
             <div style={{ textAlign: 'center', margin: 'auto 0', padding: '2rem' }}>
               <Bot size={48} color="var(--primary)" style={{ opacity: 0.8, marginBottom: '1rem' }} />
               <h3>How can MediCare AI assist your health today?</h3>
-              <p style={{ color: 'var(--text-muted)', fontSize: '0.9rem', maxWidth: '500px', margin: '0.5rem auto 1.5rem' }}>
-                Ask any general medical question, inquire about symptoms, or request first-aid guidance.
+              <p style={{ color: 'var(--text-muted)', fontSize: '0.9rem', maxWidth: '520px', margin: '0.5rem auto 1.5rem' }}>
+                Ask questions about symptoms, medications, first-aid procedures, or general medical wellness.
               </p>
               
               {/* Quick Sample Queries */}
-              <div style={{ display: 'flex', flexWrap: 'wrap', gap: '0.5rem', justifyContent: 'center' }}>
-                {[
-                  "What should I do for a mild fever?",
-                  "How to manage tension headaches at home?",
-                  "What are natural ways to soothe a sore throat?",
-                  "When is chest pain considered a medical emergency?"
-                ].map((q, idx) => (
+              <div style={{ display: 'flex', flexWrap: 'wrap', gap: '0.6rem', justifyContent: 'center', maxWidth: '700px', margin: '0 auto' }}>
+                {sampleQueries.map((q, idx) => (
                   <button key={idx} onClick={() => handleSendMessage(q)} className="btn btn-secondary" style={{ fontSize: '0.85rem', padding: '0.5rem 0.9rem', borderRadius: '20px' }}>
                     <Sparkles size={14} color="var(--primary)" /> {q}
                   </button>
@@ -206,47 +216,58 @@ export const ChatAssistantPage = () => {
               className="animate-fade-in"
               style={{
                 display: 'flex',
-                justifyContent: msg.sender === 'user' ? 'flex-end' : 'flex-start',
+                justify: msg.sender === 'user' ? 'flex-end' : 'flex-start',
                 alignItems: 'flex-start',
                 gap: '0.75rem'
               }}
             >
               {msg.sender === 'assistant' && (
-                <div style={{ background: 'var(--primary)', color: '#fff', padding: '0.4rem', borderRadius: '50%', marginTop: '0.2rem' }}>
+                <div style={{ background: 'var(--primary)', color: '#fff', padding: '0.4rem', borderRadius: '50%', marginTop: '0.2rem', flexShrink: 0 }}>
                   <Bot size={18} />
                 </div>
               )}
 
               <div 
                 style={{
-                  maxWidth: '80%',
+                  maxWidth: '82%',
                   padding: '1rem 1.25rem',
                   borderRadius: msg.sender === 'user' ? '18px 18px 4px 18px' : '18px 18px 18px 4px',
                   background: msg.sender === 'user' ? 'linear-gradient(135deg, var(--primary) 0%, var(--primary-hover) 100%)' : 'var(--bg-card-solid)',
                   color: msg.sender === 'user' ? '#ffffff' : 'var(--text-main)',
                   border: msg.sender === 'user' ? 'none' : '1px solid var(--border-color)',
                   boxShadow: 'var(--shadow-sm)',
+                  lineHeight: 1.6,
                   whiteSpace: 'pre-line'
                 }}
               >
                 <div>{msg.content}</div>
 
                 {msg.sender === 'assistant' && (
-                  <div style={{ marginTop: '0.5rem', paddingTop: '0.5rem', borderTop: '1px solid var(--border-color)', display: 'flex', alignItems: 'center', justifyContent: 'space-between', fontSize: '0.75rem', color: 'var(--text-muted)' }}>
-                    <span>MediCare AI</span>
-                    <button 
-                      onClick={() => speakText(msg.id, msg.content)} 
-                      style={{ background: 'none', border: 'none', color: speakingMsgId === msg.id ? 'var(--primary)' : 'var(--text-muted)', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '0.2rem' }}
-                      title="Listen to response"
-                    >
-                      {speakingMsgId === msg.id ? <VolumeX size={14} /> : <Volume2 size={14} />} {speakingMsgId === msg.id ? 'Stop' : 'Listen'}
-                    </button>
+                  <div style={{ marginTop: '0.75rem', paddingTop: '0.5rem', borderTop: '1px solid var(--border-color)', display: 'flex', alignItems: 'center', justifyContent: 'space-between', fontSize: '0.75rem', color: 'var(--text-muted)' }}>
+                    <span>MediCare AI Assistant</span>
+                    <div style={{ display: 'flex', gap: '0.75rem', alignItems: 'center' }}>
+                      <button 
+                        onClick={() => copyToClipboard(msg.id, msg.content)}
+                        style={{ background: 'none', border: 'none', color: copiedId === msg.id ? 'var(--secondary)' : 'var(--text-muted)', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '0.2rem' }}
+                        title="Copy Answer"
+                      >
+                        {copiedId === msg.id ? <Check size={14} /> : <Copy size={14} />} {copiedId === msg.id ? 'Copied' : 'Copy'}
+                      </button>
+                      
+                      <button 
+                        onClick={() => speakText(msg.id, msg.content)} 
+                        style={{ background: 'none', border: 'none', color: speakingMsgId === msg.id ? 'var(--primary)' : 'var(--text-muted)', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '0.2rem' }}
+                        title="Listen to response"
+                      >
+                        {speakingMsgId === msg.id ? <VolumeX size={14} /> : <Volume2 size={14} />} {speakingMsgId === msg.id ? 'Stop' : 'Listen'}
+                      </button>
+                    </div>
                   </div>
                 )}
               </div>
 
               {msg.sender === 'user' && (
-                <div style={{ background: 'var(--bg-input)', color: 'var(--text-main)', padding: '0.4rem', borderRadius: '50%', border: '1px solid var(--border-color)', marginTop: '0.2rem' }}>
+                <div style={{ background: 'var(--bg-input)', color: 'var(--text-main)', padding: '0.4rem', borderRadius: '50%', border: '1px solid var(--border-color)', marginTop: '0.2rem', flexShrink: 0 }}>
                   <User size={18} />
                 </div>
               )}
@@ -259,7 +280,7 @@ export const ChatAssistantPage = () => {
                 <Bot size={18} />
               </div>
               <div style={{ padding: '0.75rem 1.25rem', borderRadius: '18px', background: 'var(--bg-card-solid)', border: '1px solid var(--border-color)', color: 'var(--text-muted)', fontSize: '0.9rem' }}>
-                <span className="pulse-active">Analyzing medical query...</span>
+                <span className="pulse-active">Analyzing medical query & evidence...</span>
               </div>
             </div>
           )}
@@ -283,7 +304,7 @@ export const ChatAssistantPage = () => {
 
             <input 
               type="text" 
-              placeholder={listening ? "Listening to your voice..." : "Type your health or medical question..."}
+              placeholder={listening ? "Listening to your voice..." : "Type your medical question or symptom..."}
               value={inputMessage}
               onChange={(e) => setInputMessage(e.target.value)}
               disabled={loading}
@@ -300,3 +321,4 @@ export const ChatAssistantPage = () => {
     </div>
   );
 };
+

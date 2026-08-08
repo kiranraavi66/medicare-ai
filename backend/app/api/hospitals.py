@@ -5,53 +5,72 @@ from app.schemas.schemas import HospitalInfo
 
 router = APIRouter(prefix="/hospitals", tags=["Hospital & Emergency Locator"])
 
-# Sample Mock Hospitals for fallback geolocation
 SAMPLE_HOSPITALS = [
     {
         "id": "hosp-1",
-        "name": "City General Hospital & Trauma Center",
-        "type": "General Hospital & Emergency",
-        "address": "104 Healthcare Boulevard, City Center",
+        "name": "City General Hospital & Level-1 Trauma Center",
+        "type": "24/7 Multi-Specialty Trauma & Emergency",
+        "address": "104 Healthcare Boulevard, Medical District",
         "phone": "+1 (800) 555-0199",
-        "lat": 0.015,
-        "lng": 0.012,
+        "lat": 0.012,
+        "lng": 0.009,
         "open_24_7": True
     },
     {
         "id": "hosp-2",
-        "name": "St. Jude Children & Family Clinic",
-        "type": "Specialized Pediatrics & Clinic",
-        "address": "45 Parkview Avenue, Westside",
+        "name": "St. Jude Children & Family Cardiac Institute",
+        "type": "Specialized Pediatrics & Cardiac Emergency",
+        "address": "45 Parkview Avenue, Westside Medical Zone",
         "phone": "+1 (800) 555-0244",
-        "lat": -0.018,
-        "lng": 0.022,
-        "open_24_7": False
+        "lat": -0.015,
+        "lng": 0.018,
+        "open_24_7": True
     },
     {
         "id": "hosp-3",
-        "name": "Apollo Super Specialty Emergency Care",
-        "type": "Super Specialty Emergency",
-        "address": "12 Metro Bypass, North Medical Zone",
+        "name": "Apollo Super Specialty Emergency & ICU Care",
+        "type": "Super Specialty Emergency & Critical Care",
+        "address": "12 Metro Bypass, North Healthcare Expressway",
         "phone": "+1 (800) 555-0911",
-        "lat": 0.025,
-        "lng": -0.015,
+        "lat": 0.022,
+        "lng": -0.012,
         "open_24_7": True
     },
     {
         "id": "hosp-4",
-        "name": "24/7 Wellness Pharmacy & Urgent Care",
-        "type": "Pharmacy & Urgent Care",
-        "address": "88 Central Square Plaza",
+        "name": "Metro Urgent Care Clinic & Diagnostic Lab",
+        "type": "Urgent Care & Family Clinic",
+        "address": "88 Central Square Plaza, Suite 4",
         "phone": "+1 (800) 555-0333",
-        "lat": -0.005,
-        "lng": -0.008,
+        "lat": -0.006,
+        "lng": -0.007,
+        "open_24_7": False
+    },
+    {
+        "id": "hosp-5",
+        "name": "Sunrise Orthopedic & Surgical Trauma Hospital",
+        "type": "Orthopedic & Joint Trauma Center",
+        "address": "205 East Ridge Avenue, Medical Sector 9",
+        "phone": "+1 (800) 555-0777",
+        "lat": 0.018,
+        "lng": 0.025,
+        "open_24_7": True
+    },
+    {
+        "id": "hosp-6",
+        "name": "24/7 LifeCare Emergency Pharmacy & Triage Unit",
+        "type": "Emergency Pharmacy & First Aid Center",
+        "address": "15 Green Valley Mall Road",
+        "phone": "+1 (800) 555-0444",
+        "lat": -0.021,
+        "lng": -0.014,
         "open_24_7": True
     }
 ]
 
 def calculate_distance(lat1, lon1, lat2, lon2):
-    # Haversine distance formula in KM
-    R = 6371.0 # Radius of Earth in km
+    """Haversine distance formula in KM."""
+    R = 6371.0 # Earth radius in KM
     dlat = math.radians(lat2 - lat1)
     dlon = math.radians(lon2 - lon1)
     a = math.sin(dlat / 2)**2 + math.cos(math.radians(lat1)) * math.cos(math.radians(lat2)) * math.sin(dlon / 2)**2
@@ -62,7 +81,7 @@ def calculate_distance(lat1, lon1, lat2, lon2):
 def get_nearby_hospitals(
     latitude: float = Query(..., description="User latitude"),
     longitude: float = Query(..., description="User longitude"),
-    radius_km: float = Query(15.0, description="Search radius in km"),
+    radius_km: float = Query(25.0, description="Search radius in km"),
     category: Optional[str] = Query("all", description="Filter category")
 ):
     results = []
