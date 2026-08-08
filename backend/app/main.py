@@ -47,7 +47,7 @@ seed_admin_user()
 app = FastAPI(
     title=settings.PROJECT_NAME,
     openapi_url=f"{settings.API_V1_STR}/openapi.json",
-    description="MediCare AI Assistant REST API for B.Tech Resume Project"
+    description="MediCare AI Assistant REST API"
 )
 
 # CORS Setup
@@ -59,8 +59,29 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-# Register Routers under /api/v1
+# Root Endpoint
+@app.get("/")
+def root():
+    return {
+        "message": "Welcome to MediCare AI Assistant Backend API",
+        "status": "online",
+        "docs": "/docs",
+        "api_v1": "/api/v1"
+    }
+
+# Health Check Endpoint
+@app.get("/health", tags=["Health"])
+def health_check():
+    return {
+        "status": "online",
+        "app": settings.PROJECT_NAME,
+        "version": "1.0.0"
+    }
+
+# Register Routers under both /api/v1 AND root for dual compatibility
 api_v1 = settings.API_V1_STR
+
+# 1. Mount with /api/v1 prefix
 app.include_router(auth_router, prefix=api_v1)
 app.include_router(chat_router, prefix=api_v1)
 app.include_router(reports_router, prefix=api_v1)
@@ -70,13 +91,15 @@ app.include_router(hospitals_router, prefix=api_v1)
 app.include_router(reminders_router, prefix=api_v1)
 app.include_router(admin_router, prefix=api_v1)
 
-@app.get("/health", tags=["Health"])
-def health_check():
-    return {
-        "status": "online",
-        "app": settings.PROJECT_NAME,
-        "version": "1.0.0"
-    }
+# 2. Dual-mount at root so calls with or without /api/v1 work 100%
+app.include_router(auth_router)
+app.include_router(chat_router)
+app.include_router(reports_router)
+app.include_router(symptoms_router)
+app.include_router(medicines_router)
+app.include_router(hospitals_router)
+app.include_router(reminders_router)
+app.include_router(admin_router)
 
 if __name__ == "__main__":
     import uvicorn
