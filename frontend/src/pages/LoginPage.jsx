@@ -14,9 +14,13 @@ export const LoginPage = () => {
 
   const parseErrorMessage = (err) => {
     if (!err.response) {
-      return 'Unable to connect to service. Please check your internet connection or try again shortly.';
+      return 'Unable to connect to backend service. Please check your internet connection or backend server status.';
+    }
+    if (err.response?.status === 404) {
+      return 'Backend API server URL not found (404). Please ensure your backend is deployed on Render/Cloud and VITE_API_BASE_URL is set in Vercel.';
     }
     const detail = err.response?.data?.detail;
+
     if (typeof detail === 'string') {
       return detail;
     }

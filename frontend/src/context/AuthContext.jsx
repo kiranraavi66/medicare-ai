@@ -3,6 +3,8 @@ import axios from 'axios';
 
 const AuthContext = createContext();
 
+const RENDER_BACKEND_URL = 'https://medicare-ai-8vv3.onrender.com/api/v1';
+
 const getInitialApiBaseUrl = () => {
   if (import.meta.env.VITE_API_BASE_URL) {
     return import.meta.env.VITE_API_BASE_URL.trim().replace(/\/$/, '');
@@ -11,8 +13,8 @@ const getInitialApiBaseUrl = () => {
   if (host === 'localhost' || host === '127.0.0.1' || host.startsWith('192.168.')) {
     return 'http://localhost:8000/api/v1';
   }
-  // Production live backend fallback
-  return 'https://medicare-ai-backend.onrender.com/api/v1';
+  // Production live Render backend URL
+  return RENDER_BACKEND_URL;
 };
 
 export const AuthProvider = ({ children }) => {
