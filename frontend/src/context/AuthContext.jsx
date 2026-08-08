@@ -7,21 +7,18 @@ const getInitialApiBaseUrl = () => {
   if (import.meta.env.VITE_API_BASE_URL) {
     return import.meta.env.VITE_API_BASE_URL.trim().replace(/\/$/, '');
   }
-  const savedUrl = localStorage.getItem('medicare_custom_api_url');
-  if (savedUrl) {
-    return savedUrl.trim().replace(/\/$/, '');
-  }
   const host = window.location.hostname;
   if (host === 'localhost' || host === '127.0.0.1' || host.startsWith('192.168.')) {
     return 'http://localhost:8000/api/v1';
   }
-  return 'http://localhost:8000/api/v1';
+  // Production live backend fallback
+  return 'https://medicare-ai-backend.onrender.com/api/v1';
 };
 
 export const AuthProvider = ({ children }) => {
   const [user, setUser] = useState(null);
   const [token, setToken] = useState(localStorage.getItem('medicare_token') || null);
-  const [apiBaseUrl, setApiBaseUrlState] = useState(getInitialApiBaseUrl());
+  const [apiBaseUrl] = useState(getInitialApiBaseUrl());
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -33,15 +30,6 @@ export const AuthProvider = ({ children }) => {
       setLoading(false);
     }
   }, [token, apiBaseUrl]);
-
-  const updateApiBaseUrl = (newUrl) => {
-    let formatted = newUrl.trim().replace(/\/$/, '');
-    if (!formatted.endsWith('/api/v1') && !formatted.includes('/api/v1')) {
-      formatted = `${formatted}/api/v1`;
-    }
-    localStorage.setItem('medicare_custom_api_url', formatted);
-    setApiBaseUrlState(formatted);
-  };
 
   const fetchCurrentUser = async () => {
     try {
@@ -94,8 +82,7 @@ export const AuthProvider = ({ children }) => {
       login, 
       register, 
       logout, 
-      API_BASE_URL: apiBaseUrl,
-      updateApiBaseUrl
+      API_BASE_URL: apiBaseUrl 
     }}>
       {children}
     </AuthContext.Provider>
@@ -103,4 +90,3 @@ export const AuthProvider = ({ children }) => {
 };
 
 export const useAuth = () => useContext(AuthContext);
-

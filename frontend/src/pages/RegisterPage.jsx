@@ -1,10 +1,10 @@
 import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
-import { UserPlus, ShieldAlert, LogIn, ArrowRight, Settings, Check } from 'lucide-react';
+import { UserPlus, ShieldAlert, LogIn, ArrowRight } from 'lucide-react';
 
 export const RegisterPage = () => {
-  const { register, API_BASE_URL, updateApiBaseUrl } = useAuth();
+  const { register } = useAuth();
   const navigate = useNavigate();
 
   const [fullName, setFullName] = useState('');
@@ -13,13 +13,10 @@ export const RegisterPage = () => {
   const [error, setError] = useState('');
   const [isEmailExistsError, setIsEmailExistsError] = useState(false);
   const [loading, setLoading] = useState(false);
-  const [showConfig, setShowConfig] = useState(false);
-  const [customUrl, setCustomUrl] = useState(API_BASE_URL);
-  const [savedSuccess, setSavedSuccess] = useState(false);
 
   const parseErrorMessage = (err) => {
     if (!err.response) {
-      return 'Unable to reach backend server. Please verify backend server URL.';
+      return 'Unable to connect to service. Please check your internet connection or try again shortly.';
     }
     const detail = err.response?.data?.detail;
     if (typeof detail === 'string') {
@@ -55,26 +52,14 @@ export const RegisterPage = () => {
       if (errMsg.toLowerCase().includes('already registered') || errMsg.toLowerCase().includes('already exist')) {
         setIsEmailExistsError(true);
       }
-      if (errMsg.includes('Unable to reach')) {
-        setShowConfig(true);
-      }
     } finally {
       setLoading(false);
     }
   };
 
-  const handleSaveUrl = (e) => {
-    e.preventDefault();
-    if (!customUrl) return;
-    updateApiBaseUrl(customUrl);
-    setSavedSuccess(true);
-    setError('');
-    setTimeout(() => setSavedSuccess(false), 3000);
-  };
-
   return (
     <div style={{ minHeight: '80vh', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '1.5rem' }}>
-      <div className="glass-card" style={{ maxWidth: '460px', width: '100%' }}>
+      <div className="glass-card" style={{ maxWidth: '440px', width: '100%' }}>
         
         <div style={{ textAlign: 'center', marginBottom: '1.5rem' }}>
           <div style={{ background: 'var(--secondary-glow)', color: 'var(--secondary)', padding: '0.8rem', borderRadius: '50%', width: 'fit-content', margin: '0 auto 1rem' }}>
@@ -99,44 +84,6 @@ export const RegisterPage = () => {
                 <Link to="/login" className="btn btn-primary" style={{ padding: '0.4rem 0.8rem', fontSize: '0.8rem', display: 'inline-flex', alignItems: 'center', gap: '0.4rem', textDecoration: 'none' }}>
                   <LogIn size={14} /> Sign In To Your Account <ArrowRight size={14} />
                 </Link>
-              </div>
-            )}
-            {error.includes('Unable to reach') && (
-              <button 
-                type="button" 
-                onClick={() => setShowConfig(!showConfig)}
-                style={{ background: 'transparent', border: 'none', color: 'var(--primary)', fontSize: '0.8rem', marginTop: '0.25rem', cursor: 'pointer', textDecoration: 'underline', fontWeight: 600, textAlign: 'left' }}
-              >
-                {showConfig ? 'Hide Backend Connection Settings' : '🔧 Configure Backend Server URL'}
-              </button>
-            )}
-          </div>
-        )}
-
-        {/* Dynamic Backend URL Config Section */}
-        {showConfig && (
-          <div style={{ background: 'var(--card-bg)', border: '1px solid var(--primary)', padding: '1rem', borderRadius: '8px', marginBottom: '1rem' }}>
-            <div style={{ fontSize: '0.85rem', fontWeight: 600, color: 'var(--primary)', marginBottom: '0.5rem', display: 'flex', alignItems: 'center', gap: '0.35rem' }}>
-              <Settings size={16} /> Backend Server Connection URL
-            </div>
-            <p style={{ fontSize: '0.75rem', color: 'var(--text-muted)', marginBottom: '0.75rem' }}>
-              Enter your live deployed backend URL (e.g. <code>https://medicare-backend.onrender.com/api/v1</code>)
-            </p>
-            <form onSubmit={handleSaveUrl} style={{ display: 'flex', gap: '0.5rem' }}>
-              <input 
-                type="text" 
-                value={customUrl} 
-                onChange={(e) => setCustomUrl(e.target.value)} 
-                placeholder="https://your-backend.onrender.com/api/v1"
-                style={{ fontSize: '0.8rem', padding: '0.4rem 0.6rem' }}
-              />
-              <button type="submit" className="btn btn-primary" style={{ padding: '0.4rem 0.75rem', fontSize: '0.8rem', whiteSpace: 'nowrap' }}>
-                Save
-              </button>
-            </form>
-            {savedSuccess && (
-              <div style={{ fontSize: '0.75rem', color: '#10b981', marginTop: '0.5rem', display: 'flex', alignItems: 'center', gap: '0.25rem', fontWeight: 600 }}>
-                <Check size={14} /> Backend URL saved! Try registering again.
               </div>
             )}
           </div>
